@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	body {
+		@apply bg-stone-50 text-gray-900;
+	}
+}
+
+@layer components {
+	.btn-primary {
+		@apply px-6 py-3 bg-gradient-to-r from-primary-500 to-accent-500 text-white font-medium rounded-lg hover:from-primary-600 hover:to-accent-600 transition-all duration-200 shadow-md hover:shadow-lg;
+	}
+
+	.btn-secondary {
+		@apply px-6 py-3 bg-white text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-all duration-200;
+	}
+
+	.card {
+		@apply bg-white rounded-xl shadow-md p-6 transition-all duration-200;
+	}
+
+	.card-hover {
+		@apply card hover:shadow-xl hover:-translate-y-1;
+	}
+}
