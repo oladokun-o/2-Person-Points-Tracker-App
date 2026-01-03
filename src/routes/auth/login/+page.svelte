@@ -12,7 +12,11 @@
 		const { data, error: signInError } = await supabase.auth.signInWithOAuth({
 			provider: 'google',
 			options: {
-				redirectTo: `${window.location.origin}/auth/callback`
+				redirectTo: `${window.location.origin}/auth/callback`,
+				queryParams: {
+					access_type: 'offline',
+					prompt: 'consent'
+				}
 			}
 		});
 
@@ -45,10 +49,10 @@
 	}
 </script>
 
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-100 via-accent-50 to-primary-50">
+<div class="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-100 via-purple-50 to-blue-50">
 	<div class="card max-w-md w-full mx-4">
 		<div class="text-center mb-8">
-			<h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-600 mb-2">
+			<h1 class="text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600 mb-2">
 				Points Tracker
 			</h1>
 			<p class="text-gray-600">Track your journey together</p>
@@ -64,7 +68,7 @@
 			<button
 				on:click={signInWithGoogle}
 				disabled={loading}
-				class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white border-2 border-gray-300 rounded-lg hover:border-primary-400 hover:bg-gray-50 transition-all duration-200 disabled:opacity-50"
+				class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white border-2 border-gray-300 rounded-lg hover:border-blue-400 hover:bg-gray-50 transition-all duration-200 disabled:opacity-50"
 			>
 				<svg class="w-5 h-5" viewBox="0 0 24 24">
 					<path
@@ -104,7 +108,7 @@
 			<button
 				on:click={signInWithEmail}
 				disabled={loading}
-				class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-primary-500 to-accent-500 text-white rounded-lg hover:from-primary-600 hover:to-accent-600 transition-all duration-200 disabled:opacity-50"
+				class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-linear-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 disabled:opacity-50"
 			>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { RewardWithStatus } from '$lib/types';
 
-	export let rewards: RewardWithStatus[];
+	let { rewards }: { rewards: RewardWithStatus[] } = $props();
 </script>
 
 <div class="card">
@@ -26,7 +26,7 @@
 									<p class="text-sm text-gray-600 mt-1">{reward.description}</p>
 								{/if}
 								<div class="flex items-center gap-2 mt-2">
-									<span class="text-xs font-medium text-primary-600">
+									<span class="text-xs font-medium text-blue-600">
 										{reward.required_points} points
 									</span>
 									{#if !reward.is_unlocked}

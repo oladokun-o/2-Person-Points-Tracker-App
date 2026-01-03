@@ -1,9 +1,15 @@
 <script lang="ts">
 	import { fly, fade } from 'svelte/transition';
 
-	export let open = false;
-	export let title = '';
-	export let onClose: () => void = () => {};
+	let {
+		open = $bindable(false),
+		title = '',
+		onClose = () => {}
+	}: {
+		open?: boolean;
+		title?: string;
+		onClose?: () => void;
+	} = $props();
 
 	function handleClose() {
 		open = false;

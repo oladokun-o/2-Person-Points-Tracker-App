@@ -4,9 +4,9 @@
 	import AwardPointsModal from '$lib/components/Dashboard/AwardPointsModal.svelte';
 	import RewardsList from '$lib/components/Dashboard/RewardsList.svelte';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
-	let showAwardModal = false;
+	let showAwardModal = $state(false);
 
 	async function signOut() {
 		await fetch('/auth/signout', { method: 'POST' });
@@ -18,7 +18,7 @@
 	<header class="bg-white shadow-sm border-b border-gray-200">
 		<div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
 			<div class="flex items-center justify-between">
-				<h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-600">
+				<h1 class="text-2xl font-bold text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600">
 					Points Tracker
 				</h1>
 				<form method="POST" action="/auth/signout">

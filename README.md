@@ -14,17 +14,16 @@ A private, intimate web app for two people to track their relationship comfort/t
 ## Tech Stack
 
 - **Frontend**: SvelteKit + TypeScript + Tailwind CSS
-- **Backend**: SvelteKit server routes + MongoDB
+- **Backend**: SvelteKit server routes + Supabase
 - **Auth**: Supabase (Google OAuth, Apple OAuth, Email)
-- **Database**: MongoDB (local or Atlas)
+- **Database**: Supabase PostgreSQL
 
 ## Getting Started
 
 ### 1. Prerequisites
 
 - Node.js 20.19+ (use nvm to switch: `nvm use 20.19.0`)
-- MongoDB running locally OR MongoDB Atlas account
-- Supabase account (for authentication)
+- Supabase account (for database and authentication)
 
 ### 2. Install Dependencies
 
@@ -43,12 +42,7 @@ cp .env.example .env
 Edit `.env` and fill in your values:
 
 ```bash
-# MongoDB
-MONGODB_URI=mongodb://localhost:27017/points-tracker
-# OR for Atlas:
-# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/points-tracker
-
-# Supabase Auth (from your Supabase project settings)
+# Supabase (from your Supabase project settings)
 PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
@@ -61,14 +55,18 @@ NODE_ENV=development
 ### 4. Set Up Supabase
 
 1. Create a project at [supabase.com](https://supabase.com)
-2. Go to **Authentication > Providers**
-3. Enable **Google** and **Apple** (optional) OAuth providers
-4. Configure redirect URLs:
+2. Run the database migration:
+   - Go to **SQL Editor** in your Supabase dashboard
+   - Create a new query and paste the contents of `supabase/migrations/20231215000000_initial_schema.sql`
+   - Click **Run** to create all tables
+3. Go to **Authentication > Providers**
+4. Enable **Google** and **Apple** (optional) OAuth providers
+5. Configure redirect URLs:
    - Development: `http://localhost:5173/auth/callback`
    - Production: `https://yourdomain.com/auth/callback`
-5. Copy your project URL and anon key to `.env`
+6. Copy your project URL and anon key to `.env`
 
-### 5. Seed the Database
+### 5. Seed the Database (Optional)
 
 Run the seed script to populate initial actions and rewards:
 
@@ -170,14 +168,14 @@ points-tracker/
 
 Don't forget to:
 - Update Supabase redirect URLs to production domain
-- Use MongoDB Atlas for production database
+- Run the database migration SQL in your production Supabase project
 - Test OAuth flow on production
 
 ## Development Roadmap
 
 ### ✅ Phase 1: MVP (Complete)
 - [x] Project setup
-- [x] MongoDB & Supabase integration
+- [x] Supabase PostgreSQL & Auth integration
 - [x] Authentication with whitelist
 - [x] Basic dashboard
 - [x] Award points functionality
@@ -215,9 +213,9 @@ Don't forget to:
 - Emails are case-insensitive and trimmed
 
 ### Database connection errors
-- Make sure MongoDB is running locally
-- Or check your MongoDB Atlas connection string
-- Verify network access in Atlas (IP whitelist)
+- Check that `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_ANON_KEY` are set correctly
+- Verify your Supabase project is active and accessible
+- Check that database tables were created using the migration SQL
 
 ### OAuth not working
 - Check Supabase redirect URLs match your domain
@@ -234,4 +232,8 @@ Private project - not for redistribution.
 
 ## Credits
 
-Built with SvelteKit, MongoDB, Supabase, and Tailwind CSS.
+Built with SvelteKit, Supabase, and Tailwind CSS.
+
+## Migration from MongoDB
+
+If you're migrating from the previous MongoDB version to Supabase PostgreSQL, see [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) for detailed instructions.

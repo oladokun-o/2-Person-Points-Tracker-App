@@ -1,36 +1,31 @@
 import { redirect, type Handle } from '@sveltejs/kit';
-import { supabase } from '$lib/server/auth/supabase';
 import { userRepository } from '$lib/server/db/repositories/userRepository';
-import { connectToDatabase } from '$lib/server/db/mongodb';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	// Connect to database on every request
-	await connectToDatabase();
 
 	// Initialize locals
 	event.locals.user = null;
 	event.locals.session = null;
 
-	// Get session from cookie
-	const sessionCookie = event.cookies.get('session');
+	// Get user ID from cookie
+	const userId = event.cookies.get('user_id');
 
-	if (sessionCookie) {
+	if (userId) {
 		try {
-			const session = JSON.parse(sessionCookie);
-			event.locals.session = session;
-
 			// Get user from database
-			const { data: { user: supabaseUser } } = await supabase.auth.getUser(session.access_token);
+			const dbUser = await userRepository.findById(userId);
 
-			if (supabaseUser) {
-				const dbUser = await userRepository.findByAuthId(supabaseUser.id);
-				if (dbUser && dbUser.is_allowed) {
-					event.locals.user = dbUser;
-				}
+			if (dbUser && dbUser.is_allowed) {
+				event.locals.user = dbUser;
+				console.log('User authenticated:', dbUser.email);
+			} else {
+				console.log('User not found or not allowed:', userId);
+				// Clear invalid cookie
+				event.cookies.delete('user_id', { path: '/' });
 			}
 		} catch (error) {
-			console.error('Session error:', error);
-			event.cookies.delete('session', { path: '/' });
+			console.error('Auth error:', error);
+			event.cookies.delete('user_id', { path: '/' });
 		}
 	}
 

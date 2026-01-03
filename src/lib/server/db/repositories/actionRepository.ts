@@ -1,38 +1,54 @@
-import { ObjectId } from 'mongodb';
-import { getDatabase, COLLECTIONS } from '../mongodb';
-import type { Action, ActionDTO } from '$lib/types';
+import { getSupabaseClient, getSupabaseAdminClient, type DbAction } from '../supabase';
+import type { ActionDTO } from '$lib/types';
 
 export class ActionRepository {
-	private get collection() {
-		return getDatabase().collection<Action>(COLLECTIONS.ACTIONS);
+	private get client() {
+		return getSupabaseClient();
 	}
 
-	private toDTO(action: Action): ActionDTO {
+	private get adminClient() {
+		return getSupabaseAdminClient();
+	}
+
+	private toDTO(action: DbAction): ActionDTO {
 		return {
-			_id: action._id.toString(),
+			_id: action.id,
 			title: action.title,
 			emoji: action.emoji,
 			points: action.points,
-			category: action.category,
-			created_by: action.created_by.toString(),
+			category: action.category ?? undefined,
+			created_by: action.created_by,
 			is_active: action.is_active,
 			use_count: action.use_count,
 			metadata: {
-				created_at: action.metadata.created_at.toISOString(),
-				updated_at: action.metadata.updated_at.toISOString()
+				created_at: action.created_at,
+				updated_at: action.updated_at
 			}
 		};
 	}
 
 	async findAll(activeOnly = true): Promise<ActionDTO[]> {
-		const filter = activeOnly ? { is_active: true } : {};
-		const actions = await this.collection.find(filter).sort({ use_count: -1 }).toArray();
-		return actions.map((action) => this.toDTO(action));
+		let query = this.client.from('actions').select('*').order('use_count', { ascending: false });
+
+		if (activeOnly) {
+			query = query.eq('is_active', true);
+		}
+
+		const { data, error } = await query;
+
+		if (error || !data) return [];
+		return data.map((action) => this.toDTO(action));
 	}
 
 	async findById(id: string): Promise<ActionDTO | null> {
-		const action = await this.collection.findOne({ _id: new ObjectId(id) });
-		return action ? this.toDTO(action) : null;
+		const { data, error } = await this.client
+			.from('actions')
+			.select('*')
+			.eq('id', id)
+			.single();
+
+		if (error || !data) return null;
+		return this.toDTO(data);
 	}
 
 	async create(actionData: {
@@ -42,56 +58,66 @@ export class ActionRepository {
 		category?: string;
 		created_by: string;
 	}): Promise<ActionDTO> {
-		const now = new Date();
-		const action: Omit<Action, '_id'> = {
-			title: actionData.title,
-			emoji: actionData.emoji,
-			points: actionData.points,
-			category: actionData.category,
-			created_by: new ObjectId(actionData.created_by),
-			is_active: true,
-			use_count: 0,
-			metadata: {
-				created_at: now,
-				updated_at: now
-			}
-		};
+		const { data, error } = await this.adminClient
+			.from('actions')
+			.insert({
+				title: actionData.title,
+				emoji: actionData.emoji,
+				points: actionData.points,
+				category: actionData.category ?? null,
+				created_by: actionData.created_by,
+				is_active: true,
+				use_count: 0
+			})
+			.select()
+			.single();
 
-		const result = await this.collection.insertOne(action as Action);
-		const created = await this.collection.findOne({ _id: result.insertedId });
-
-		if (!created) {
-			throw new Error('Failed to create action');
+		if (error || !data) {
+			throw new Error(`Failed to create action: ${error?.message}`);
 		}
 
-		return this.toDTO(created);
+		return this.toDTO(data);
 	}
 
 	async update(
 		id: string,
-		updates: Partial<Pick<Action, 'title' | 'emoji' | 'points' | 'category' | 'is_active'>>
+		updates: Partial<Pick<DbAction, 'title' | 'emoji' | 'points' | 'category' | 'is_active'>>
 	): Promise<ActionDTO | null> {
-		const updated = await this.collection.findOneAndUpdate(
-			{ _id: new ObjectId(id) },
-			{ $set: { ...updates, 'metadata.updated_at': new Date() } },
-			{ returnDocument: 'after' }
-		);
+		const { data, error } = await this.adminClient
+			.from('actions')
+			.update(updates)
+			.eq('id', id)
+			.select()
+			.single();
 
-		return updated ? this.toDTO(updated) : null;
+		if (error || !data) return null;
+		return this.toDTO(data);
 	}
 
 	async incrementUseCount(id: string): Promise<void> {
-		await this.collection.updateOne({ _id: new ObjectId(id) }, { $inc: { use_count: 1 } });
+		// Get current use_count
+		const { data: current } = await this.adminClient
+			.from('actions')
+			.select('use_count')
+			.eq('id', id)
+			.single();
+
+		if (current) {
+			await this.adminClient
+				.from('actions')
+				.update({ use_count: current.use_count + 1 })
+				.eq('id', id);
+		}
 	}
 
 	async delete(id: string): Promise<boolean> {
 		// Soft delete by setting is_active to false
-		const result = await this.collection.updateOne(
-			{ _id: new ObjectId(id) },
-			{ $set: { is_active: false } }
-		);
+		const { error } = await this.adminClient
+			.from('actions')
+			.update({ is_active: false })
+			.eq('id', id);
 
-		return result.modifiedCount > 0;
+		return !error;
 	}
 }
 

@@ -2,22 +2,29 @@
 	import Modal from '../Shared/Modal.svelte';
 	import type { UserDTO, ActionDTO } from '$lib/types';
 
-	export let open = false;
-	export let users: UserDTO[];
-	export let actions: ActionDTO[];
-	export let currentUser: UserDTO;
+	let {
+		open = $bindable(false),
+		users,
+		actions,
+		currentUser
+	}: {
+		open?: boolean;
+		users: UserDTO[];
+		actions: ActionDTO[];
+		currentUser: UserDTO;
+	} = $props();
 
-	let selectedUser: string = '';
-	let selectedAction: string = '';
-	let customPoints: number = 0;
-	let note: string = '';
-	let loading = false;
-	let error = '';
-	let success = '';
+	let selectedUser = $state('');
+	let selectedAction = $state('');
+	let customPoints = $state(0);
+	let note = $state('');
+	let loading = $state(false);
+	let error = $state('');
+	let success = $state('');
 
-	$: otherUsers = users.filter((u) => u._id !== currentUser._id);
-	$: selectedActionData = actions.find((a) => a._id === selectedAction);
-	$: pointsToAward = selectedAction ? selectedActionData?.points || 0 : customPoints;
+	let otherUsers = $derived(users.filter((u) => u._id !== currentUser._id));
+	let selectedActionData = $derived(actions.find((a) => a._id === selectedAction));
+	let pointsToAward = $derived(selectedAction ? selectedActionData?.points || 0 : customPoints);
 
 	function reset() {
 		selectedUser = '';
@@ -100,7 +107,7 @@
 			<select
 				id="user"
 				bind:value={selectedUser}
-				class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+				class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 				required
 			>
 				<option value="">Select a user</option>
@@ -120,8 +127,8 @@
 						on:click={() => (selectedAction = action._id)}
 						class="px-4 py-3 rounded-lg border-2 transition-all text-left {selectedAction ===
 						action._id
-							? 'border-primary-500 bg-primary-50'
-							: 'border-gray-200 hover:border-primary-300'}"
+							? 'border-blue-500 bg-blue-50'
+							: 'border-gray-200 hover:border-blue-300'}"
 					>
 						<div class="text-2xl mb-1">{action.emoji}</div>
 						<div class="text-sm font-medium">{action.title}</div>
@@ -145,7 +152,7 @@
 				type="number"
 				bind:value={customPoints}
 				on:input={() => (selectedAction = '')}
-				class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+				class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 				placeholder="e.g., 5 or -2"
 			/>
 		</div>
@@ -159,7 +166,7 @@
 				id="note"
 				bind:value={note}
 				rows="3"
-				class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+				class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 				placeholder="You made my day!"
 			/>
 		</div>

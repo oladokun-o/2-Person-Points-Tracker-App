@@ -1,33 +1,43 @@
-import { ObjectId } from 'mongodb';
-import { getDatabase, COLLECTIONS } from '../mongodb';
-import type { Reward, RewardDTO, RewardWithStatus } from '$lib/types';
+import { getSupabaseClient, getSupabaseAdminClient, type DbReward } from '../supabase';
+import type { RewardDTO, RewardWithStatus } from '$lib/types';
 
 export class RewardRepository {
-	private get collection() {
-		return getDatabase().collection<Reward>(COLLECTIONS.REWARDS);
+	private get client() {
+		return getSupabaseClient();
 	}
 
-	private toDTO(reward: Reward): RewardDTO {
+	private get adminClient() {
+		return getSupabaseAdminClient();
+	}
+
+	private toDTO(reward: DbReward): RewardDTO {
 		return {
-			_id: reward._id.toString(),
+			_id: reward.id,
 			title: reward.title,
-			description: reward.description,
+			description: reward.description ?? undefined,
 			emoji: reward.emoji,
 			required_points: reward.required_points,
-			category: reward.category,
+			category: reward.category ?? undefined,
 			order: reward.order,
 			is_active: reward.is_active,
 			metadata: {
-				created_at: reward.metadata.created_at.toISOString(),
-				updated_at: reward.metadata.updated_at.toISOString()
+				created_at: reward.created_at,
+				updated_at: reward.updated_at
 			}
 		};
 	}
 
 	async findAll(activeOnly = true): Promise<RewardDTO[]> {
-		const filter = activeOnly ? { is_active: true } : {};
-		const rewards = await this.collection.find(filter).sort({ order: 1 }).toArray();
-		return rewards.map((reward) => this.toDTO(reward));
+		let query = this.client.from('rewards').select('*').order('order', { ascending: true });
+
+		if (activeOnly) {
+			query = query.eq('is_active', true);
+		}
+
+		const { data, error } = await query;
+
+		if (error || !data) return [];
+		return data.map((reward) => this.toDTO(reward));
 	}
 
 	async findAllWithStatus(userPoints: number, activeOnly = true): Promise<RewardWithStatus[]> {
@@ -40,8 +50,14 @@ export class RewardRepository {
 	}
 
 	async findById(id: string): Promise<RewardDTO | null> {
-		const reward = await this.collection.findOne({ _id: new ObjectId(id) });
-		return reward ? this.toDTO(reward) : null;
+		const { data, error } = await this.client
+			.from('rewards')
+			.select('*')
+			.eq('id', id)
+			.single();
+
+		if (error || !data) return null;
+		return this.toDTO(data);
 	}
 
 	async create(rewardData: {
@@ -52,64 +68,68 @@ export class RewardRepository {
 		category?: string;
 		order: number;
 	}): Promise<RewardDTO> {
-		const now = new Date();
-		const reward: Omit<Reward, '_id'> = {
-			title: rewardData.title,
-			description: rewardData.description,
-			emoji: rewardData.emoji,
-			required_points: rewardData.required_points,
-			category: rewardData.category,
-			order: rewardData.order,
-			is_active: true,
-			metadata: {
-				created_at: now,
-				updated_at: now
-			}
-		};
+		const { data, error } = await this.adminClient
+			.from('rewards')
+			.insert({
+				title: rewardData.title,
+				description: rewardData.description ?? null,
+				emoji: rewardData.emoji,
+				required_points: rewardData.required_points,
+				category: rewardData.category ?? null,
+				order: rewardData.order,
+				is_active: true
+			})
+			.select()
+			.single();
 
-		const result = await this.collection.insertOne(reward as Reward);
-		const created = await this.collection.findOne({ _id: result.insertedId });
-
-		if (!created) {
-			throw new Error('Failed to create reward');
+		if (error || !data) {
+			throw new Error(`Failed to create reward: ${error?.message}`);
 		}
 
-		return this.toDTO(created);
+		return this.toDTO(data);
 	}
 
 	async update(
 		id: string,
 		updates: Partial<
-			Pick<Reward, 'title' | 'description' | 'emoji' | 'required_points' | 'category' | 'order' | 'is_active'>
+			Pick<DbReward, 'title' | 'description' | 'emoji' | 'required_points' | 'category' | 'order' | 'is_active'>
 		>
 	): Promise<RewardDTO | null> {
-		const updated = await this.collection.findOneAndUpdate(
-			{ _id: new ObjectId(id) },
-			{ $set: { ...updates, 'metadata.updated_at': new Date() } },
-			{ returnDocument: 'after' }
-		);
+		const { data, error } = await this.adminClient
+			.from('rewards')
+			.update(updates)
+			.eq('id', id)
+			.select()
+			.single();
 
-		return updated ? this.toDTO(updated) : null;
+		if (error || !data) return null;
+		return this.toDTO(data);
 	}
 
 	async delete(id: string): Promise<boolean> {
 		// Soft delete
-		const result = await this.collection.updateOne(
-			{ _id: new ObjectId(id) },
-			{ $set: { is_active: false } }
-		);
+		const { error } = await this.adminClient
+			.from('rewards')
+			.update({ is_active: false })
+			.eq('id', id);
 
-		return result.modifiedCount > 0;
+		return !error;
 	}
 
 	async getNextUnlockedReward(currentPoints: number, newPoints: number): Promise<RewardDTO | null> {
 		// Find rewards that were locked but are now unlocked
-		const reward = await this.collection.findOne({
-			is_active: true,
-			required_points: { $gt: currentPoints, $lte: newPoints }
-		}, { sort: { required_points: 1 } });
+		const { data, error } = await this.client
+			.from('rewards')
+			.select('*')
+			.eq('is_active', true)
+			.gt('required_points', currentPoints)
+			.lte('required_points', newPoints)
+			.order('required_points', { ascending: true })
+			.limit(1)
+			.single();
 
-		return reward ? this.toDTO(reward) : null;
+		if (error || !data) return null;
+		return this.toDTO(data);
 	}
 }
 
