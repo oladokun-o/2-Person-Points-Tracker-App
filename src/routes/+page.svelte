@@ -1,34 +1,44 @@
 <script lang="ts">
+	import { invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
 	import PointsDisplay from '$lib/components/Dashboard/PointsDisplay.svelte';
 	import AwardPointsModal from '$lib/components/Dashboard/AwardPointsModal.svelte';
 	import RewardsList from '$lib/components/Dashboard/RewardsList.svelte';
+	import NotesSection from '$lib/components/Dashboard/NotesSection.svelte';
 
 	let { data }: { data: PageData } = $props();
 
 	let showAwardModal = $state(false);
 
-	async function signOut() {
-		await fetch('/auth/signout', { method: 'POST' });
+	async function refreshData() {
+		await invalidateAll();
 	}
 </script>
+
+<svelte:head>
+	<title>Dashboard - Points Tracker</title>
+</svelte:head>
 
 <div class="min-h-screen bg-stone-50">
 	<!-- Header -->
 	<header class="bg-white shadow-sm border-b border-gray-200">
 		<div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
 			<div class="flex items-center justify-between">
-				<h1 class="text-2xl font-bold text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600">
-					Points Tracker
-				</h1>
-				<form method="POST" action="/auth/signout">
-					<button
-						type="submit"
-						class="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-					>
-						Sign Out
-					</button>
-				</form>
+				<div class="flex items-center gap-3">
+					<img src="/icon.svg" alt="Points Tracker Logo" class="w-10 h-10" />
+					<h1 class="text-2xl font-bold text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600">
+						Points Tracker
+					</h1>
+				</div>
+				<button
+					onclick={async () => {
+						await fetch('/auth/signout', { method: 'POST' });
+						window.location.href = '/auth/login';
+					}}
+					class="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+				>
+					Sign Out
+				</button>
 			</div>
 		</div>
 	</header>
@@ -44,7 +54,7 @@
 
 		<!-- Award Points Button -->
 		<div class="mb-8">
-			<button on:click={() => (showAwardModal = true)} class="btn-primary w-full sm:w-auto">
+			<button onclick={() => (showAwardModal = true)} class="btn-primary w-full sm:w-auto">
 				<svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
@@ -60,6 +70,13 @@
 		<!-- Rewards Section -->
 		{#if data.user}
 			<RewardsList rewards={data.rewards} />
+		{/if}
+
+		<!-- Shared Notes Section -->
+		{#if data.user}
+			<div class="mt-8">
+				<NotesSection notes={data.notes} currentUser={data.user} onUpdate={refreshData} />
+			</div>
 		{/if}
 
 		<!-- Recent Activity -->
@@ -100,5 +117,6 @@
 		users={data.users}
 		actions={data.actions}
 		currentUser={data.user}
+		onSuccess={refreshData}
 	/>
 {/if}

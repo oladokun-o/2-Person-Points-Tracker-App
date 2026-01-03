@@ -9,7 +9,9 @@ A private, intimate web app for two people to track their relationship comfort/t
 - **Rewards**: Unlock rewards at specific point thresholds
 - **Transaction History**: See all point exchanges over time
 - **Actions**: Pre-defined and custom actions for awarding/deducting points
+- **Shared Notes**: Add and pin shared notes between users
 - **Whitelist Auth**: Only 2 specific users can access (via Google/Apple OAuth)
+- **PWA Support**: Install as a mobile app on iOS and Android
 
 ## Tech Stack
 
@@ -157,6 +159,39 @@ points-tracker/
 ### History
 - `GET /api/history?limit=50` - Get transaction history
 
+### Notes
+- `GET /api/notes` - Get all shared notes
+- `POST /api/notes` - Create a new note
+- `PATCH /api/notes/[id]` - Update note content or toggle pin
+- `DELETE /api/notes/[id]` - Delete a note
+
+## PWA Installation
+
+The app works as a Progressive Web App and can be installed on mobile devices:
+
+### iOS (iPhone/iPad)
+1. Open the app in Safari
+2. Tap the Share button
+3. Scroll down and tap "Add to Home Screen"
+4. Tap "Add"
+5. The app will appear on your home screen
+
+### Android
+1. Open the app in Chrome
+2. Tap the three-dot menu
+3. Tap "Add to Home screen" or "Install app"
+4. Confirm the installation
+
+### Desktop (Chrome/Edge)
+1. Look for the install icon in the address bar
+2. Click "Install"
+
+Once installed, the app will:
+- Work offline with cached content
+- Feel like a native app
+- Have its own app icon
+- Run in a standalone window
+
 ## Deployment
 
 ### Vercel (Recommended)
@@ -204,7 +239,7 @@ Don't forget to:
 - [ ] Statistics/charts
 - [ ] Streaks & achievements
 - [ ] Custom themes
-- [ ] PWA support
+- [x] PWA support
 
 ## Troubleshooting
 

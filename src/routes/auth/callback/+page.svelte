@@ -58,6 +58,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Signing In - Points Tracker</title>
+</svelte:head>
+
 <div class="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-100 via-purple-50 to-blue-50">
 	<div class="card max-w-md w-full mx-4 text-center">
 		{#if processing}

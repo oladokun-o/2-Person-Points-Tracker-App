@@ -6,12 +6,14 @@
 		open = $bindable(false),
 		users,
 		actions,
-		currentUser
+		currentUser,
+		onSuccess = async () => {}
 	}: {
 		open?: boolean;
 		users: UserDTO[];
 		actions: ActionDTO[];
 		currentUser: UserDTO;
+		onSuccess?: () => void | Promise<void>;
 	} = $props();
 
 	let selectedUser = $state('');
@@ -69,8 +71,11 @@
 			const data = await response.json();
 			success = `Successfully awarded ${pointsToAward} points!`;
 
+			await onSuccess();
+
 			setTimeout(() => {
-				window.location.reload();
+				reset();
+				open = false;
 			}, 1500);
 		} catch (err: any) {
 			error = err.message;

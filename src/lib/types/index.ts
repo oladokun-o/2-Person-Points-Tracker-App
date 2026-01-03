@@ -75,6 +75,18 @@ export interface TransactionDTO {
 	by_user?: UserDTO;
 }
 
+// Client-safe note
+export interface NoteDTO {
+	_id: string;
+	content: string;
+	created_by: string;
+	is_pinned: boolean;
+	created_at: string;
+	updated_at: string;
+	// Populated fields
+	creator?: UserDTO;
+}
+
 // API Request/Response types
 export interface AwardPointsRequest {
 	awarded_to: string;

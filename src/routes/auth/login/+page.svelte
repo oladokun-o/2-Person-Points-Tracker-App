@@ -49,9 +49,16 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Sign In - Points Tracker</title>
+</svelte:head>
+
 <div class="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-100 via-purple-50 to-blue-50">
 	<div class="card max-w-md w-full mx-4">
 		<div class="text-center mb-8">
+			<div class="flex justify-center mb-4">
+				<img src="/icon.svg" alt="Points Tracker Logo" class="w-24 h-24" />
+			</div>
 			<h1 class="text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600 mb-2">
 				Points Tracker
 			</h1>

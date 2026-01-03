@@ -1,0 +1,26 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <rect width="512" height="512" rx="115" fill="url(#bgGradient)"/>
+
+  <!-- Trophy/Star icon -->
+  <g transform="translate(256, 256)">
+    <!-- Star shape -->
+    <path d="M 0,-120 L 28,-40 L 113,-40 L 45,10 L 70,95 L 0,45 L -70,95 L -45,10 L -113,-40 L -28,-40 Z"
+          fill="#ffffff" opacity="0.95"/>
+
+    <!-- Inner circle -->
+    <circle cx="0" cy="0" r="45" fill="#fbbf24" opacity="0.9"/>
+
+    <!-- Plus sign in center -->
+    <rect x="-5" y="-25" width="10" height="50" fill="#ffffff" rx="3"/>
+    <rect x="-25" y="-5" width="50" height="10" fill="#ffffff" rx="3"/>
+  </g>
+</svg>
