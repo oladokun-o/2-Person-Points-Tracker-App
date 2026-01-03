@@ -30,7 +30,9 @@
 	},
 	"dependencies": {
 		"@supabase/supabase-js": "^2.87.3",
+		"@sveltejs/adapter-netlify": "^5.2.4",
 		"@tailwindcss/postcss": "^4.1.18",
+		"@tailwindcss/vite": "^4.1.18",
 		"lucide-svelte": "^0.561.0"
 	}
 }
