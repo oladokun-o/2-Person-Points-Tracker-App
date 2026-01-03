@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { supabase } from '$lib/supabaseClient';
-	import { page } from '$app/stores';
 
 	let error = '';
 	let processing = true;
