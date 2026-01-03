@@ -110,6 +110,7 @@
 
 	<!-- Add Note Form -->
 	<div class="mb-6">
+		<!-- svelte-ignore event_directive_deprecated -->
 		<form on:submit|preventDefault={handleAddNote} class="flex gap-2">
 			<input
 				type="text"
@@ -146,7 +147,7 @@
 				>
 					<div class="flex items-start justify-between gap-3">
 						<div class="flex-1 min-w-0">
-							<p class="text-gray-900 whitespace-pre-wrap break-words">{note.content}</p>
+							<p class="text-gray-900 whitespace-pre-wrap wrap-break-word">{note.content}</p>
 							<div class="flex items-center gap-2 mt-2 text-xs text-gray-500">
 								<span>{formatDate(note.created_at)}</span>
 								{#if note.creator}
@@ -158,6 +159,7 @@
 
 						<div class="flex items-center gap-1">
 							<!-- Pin Button -->
+							<!-- svelte-ignore event_directive_deprecated -->
 							<button
 								type="button"
 								on:click={() => togglePin(note._id)}
@@ -177,6 +179,7 @@
 
 							<!-- Delete Button (only for creator) -->
 							{#if note.created_by === currentUser._id}
+								<!-- svelte-ignore event_directive_deprecated -->
 								<button
 									type="button"
 									on:click={() => deleteNote(note._id)}

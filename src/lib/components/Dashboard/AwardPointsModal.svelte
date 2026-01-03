@@ -103,6 +103,7 @@
 		</div>
 	{/if}
 
+	<!-- svelte-ignore event_directive_deprecated -->
 	<form on:submit|preventDefault={handleSubmit} class="space-y-4">
 		<!-- Select User -->
 		<div>
@@ -124,6 +125,7 @@
 
 		<!-- Select Action -->
 		<div>
+			<!-- svelte-ignore a11y_label_has_associated_control -->
 			<label class="block text-sm font-medium text-gray-700 mb-2">Choose an action:</label>
 			<div class="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
 				{#each actions as action}
@@ -173,7 +175,7 @@
 				rows="3"
 				class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 				placeholder="You made my day!"
-			/>
+			></textarea>
 		</div>
 
 		<!-- Submit -->

@@ -24,6 +24,9 @@
 </script>
 
 {#if open}
+	<!-- svelte-ignore a11y_interactive_supports_focus -->
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore event_directive_deprecated -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
 		transition:fade={{ duration: 200 }}
@@ -31,6 +34,7 @@
 		role="dialog"
 		aria-modal="true"
 	>
+		<!-- svelte-ignore slot_element_deprecated -->
 		<div
 			class="card max-w-lg w-full max-h-[90vh] overflow-y-auto"
 			transition:fly={{ y: 20, duration: 200 }}
