@@ -1,9 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import {
-  PUBLIC_SUPABASE_URL,
-  PUBLIC_SUPABASE_ANON_KEY,
-} from "$env/static/public";
-import { env } from "$env/dynamic/private";
+import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
+import { SUPABASE_SERVICE_KEY } from '$env/static/private';
 
 if (!PUBLIC_SUPABASE_URL || !PUBLIC_SUPABASE_ANON_KEY) {
 	throw new Error('Supabase environment variables are not set');
@@ -21,11 +18,11 @@ export function getSupabaseClient(): SupabaseClient {
 
 // Admin client with service role key - bypasses RLS
 export function getSupabaseAdminClient(): SupabaseClient {
-	if (!env.SUPABASE_SERVICE_KEY) {
+	if (!SUPABASE_SERVICE_KEY) {
 		throw new Error('SUPABASE_SERVICE_KEY is not set');
 	}
 	if (!supabaseAdminClient) {
-		supabaseAdminClient = createClient(PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_KEY, {
+		supabaseAdminClient = createClient(PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_KEY, {
 			auth: {
 				autoRefreshToken: false,
 				persistSession: false
