@@ -97,7 +97,7 @@ export class UserRepository {
 				points: 0,
 				total_earned: 0,
 				total_lost: 0,
-				max_points: 10,
+				max_points: 20,
 				is_allowed: userData.is_allowed ?? false
 			})
 			.select()

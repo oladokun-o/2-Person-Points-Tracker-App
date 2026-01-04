@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Modal from '../Shared/Modal.svelte';
+	import { toasts } from '$lib/stores/toast';
 	import type { UserDTO, ActionDTO } from '$lib/types';
 
 	let {
@@ -21,8 +22,6 @@
 	let customPoints = $state(0);
 	let note = $state('');
 	let loading = $state(false);
-	let error = $state('');
-	let success = $state('');
 
 	let otherUsers = $derived(users.filter((u) => u._id !== currentUser._id));
 	let selectedActionData = $derived(actions.find((a) => a._id === selectedAction));
@@ -33,23 +32,20 @@
 		selectedAction = '';
 		customPoints = 0;
 		note = '';
-		error = '';
-		success = '';
 	}
 
 	async function handleSubmit() {
 		if (!selectedUser) {
-			error = 'Please select a user';
+			toasts.error('Please select a user');
 			return;
 		}
 
 		if (pointsToAward === 0) {
-			error = 'Please select an action or enter custom points';
+			toasts.error('Please select an action or enter custom points');
 			return;
 		}
 
 		loading = true;
-		error = '';
 
 		try {
 			const response = await fetch('/api/award-points', {
@@ -68,17 +64,14 @@
 				throw new Error(data.message || 'Failed to award points');
 			}
 
-			const data = await response.json();
-			success = `Successfully awarded ${pointsToAward} points!`;
+			const recipientUser = users.find((u) => u._id === selectedUser);
+			toasts.success(`Successfully awarded ${pointsToAward} points to ${recipientUser?.name || 'user'}! 🎉`);
 
 			await onSuccess();
-
-			setTimeout(() => {
-				reset();
-				open = false;
-			}, 1500);
+			reset();
+			open = false;
 		} catch (err: any) {
-			error = err.message;
+			toasts.error(err.message || 'Failed to award points');
 		} finally {
 			loading = false;
 		}

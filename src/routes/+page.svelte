@@ -1,12 +1,19 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
+	import { page } from '$app/state';
 	import type { PageData } from './$types';
+	import Navigation from '$lib/components/Shared/Navigation.svelte';
 	import PointsDisplay from '$lib/components/Dashboard/PointsDisplay.svelte';
 	import AwardPointsModal from '$lib/components/Dashboard/AwardPointsModal.svelte';
 	import RewardsList from '$lib/components/Dashboard/RewardsList.svelte';
 	import NotesSection from '$lib/components/Dashboard/NotesSection.svelte';
+	import ActivityFeed from '$lib/components/Dashboard/ActivityFeed.svelte';
 
 	let { data }: { data: PageData } = $props();
+
+	$effect(() => {
+		console.log('Recent transactions:', data.recentTransactions)
+	})
 
 	let showAwardModal = $state(false);
 
@@ -20,28 +27,7 @@
 </svelte:head>
 
 <div class="min-h-screen bg-stone-50">
-	<!-- Header -->
-	<header class="bg-white shadow-sm border-b border-gray-200">
-		<div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-			<div class="flex items-center justify-between">
-				<div class="flex items-center gap-3">
-					<img src="/icon.svg" alt="Points Tracker Logo" class="w-10 h-10" />
-					<h1 class="text-2xl font-bold text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600">
-						Points Tracker
-					</h1>
-				</div>
-				<button
-					onclick={async () => {
-						await fetch('/auth/signout', { method: 'POST' });
-						window.location.href = '/auth/login';
-					}}
-					class="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-				>
-					Sign Out
-				</button>
-			</div>
-		</div>
-	</header>
+	<Navigation currentUser={data.user} currentPath={page.url.pathname} />
 
 	<!-- Main Content -->
 	<main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
@@ -79,34 +65,10 @@
 			</div>
 		{/if}
 
-		<!-- Recent Activity -->
-		{#if data.recentTransactions.length > 0}
-			<div class="card mt-8">
-				<h2 class="text-2xl font-bold text-gray-900 mb-4">Recent Activity</h2>
-				<div class="space-y-3">
-					{#each data.recentTransactions as transaction}
-						<div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-							<div class="flex items-center gap-3">
-								<div class="text-2xl">
-									{transaction.points > 0 ? '✅' : '❌'}
-								</div>
-								<div>
-									<p class="text-sm text-gray-900">
-										{transaction.points > 0 ? '+' : ''}{transaction.points} points
-									</p>
-									{#if transaction.note}
-										<p class="text-xs text-gray-600">{transaction.note}</p>
-									{/if}
-								</div>
-							</div>
-							<span class="text-xs text-gray-500">
-								{new Date(transaction.created_at).toLocaleDateString()}
-							</span>
-						</div>
-					{/each}
-				</div>
-			</div>
-		{/if}
+		<!-- Recent Activity Feed -->
+		<div class="mt-8">
+			<ActivityFeed transactions={data.recentTransactions} />
+		</div>
 	</main>
 </div>
 

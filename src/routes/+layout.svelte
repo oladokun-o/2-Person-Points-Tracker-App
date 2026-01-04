@@ -2,6 +2,7 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+	import Toast from '$lib/components/Shared/Toast.svelte';
 
 	let { children } = $props();
 
@@ -19,4 +20,5 @@
 	});
 </script>
 
+<Toast />
 {@render children()}

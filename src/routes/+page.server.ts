@@ -31,11 +31,19 @@ export const load: PageServerLoad = async ({ locals }) => {
 		creator: users.find((u) => u._id === note.created_by)
 	}));
 
+	// Populate user and action info for transactions
+	const transactionsWithDetails = recentTransactions.map((transaction) => ({
+		...transaction,
+		to_user: users.find((u) => u._id === transaction.awarded_to),
+		by_user: users.find((u) => u._id === transaction.awarded_by),
+		action: transaction.action_id ? actions.find((a) => a._id === transaction.action_id) : undefined
+	}));
+
 	return {
 		users,
 		actions,
 		rewards,
-		recentTransactions,
+		recentTransactions: transactionsWithDetails,
 		notes: notesWithCreator
 	};
 };

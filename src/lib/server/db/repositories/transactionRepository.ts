@@ -1,11 +1,7 @@
-import { getSupabaseClient, getSupabaseAdminClient, type DbTransaction } from '../supabase';
+import { getSupabaseAdminClient, type DbTransaction } from '../supabase';
 import type { TransactionDTO } from '$lib/types';
 
 export class TransactionRepository {
-	private get client() {
-		return getSupabaseClient();
-	}
-
 	private get adminClient() {
 		return getSupabaseAdminClient();
 	}
@@ -49,7 +45,7 @@ export class TransactionRepository {
 	}
 
 	async findRecent(limit = 50, userId?: string): Promise<TransactionDTO[]> {
-		let query = this.client
+		let query = this.adminClient
 			.from('transactions')
 			.select('*')
 			.order('created_at', { ascending: false })
@@ -61,12 +57,15 @@ export class TransactionRepository {
 
 		const { data, error } = await query;
 
-		if (error || !data) return [];
+		if (error || !data) {
+			console.error('Error fetching transactions:', error);
+			return [];
+		}
 		return data.map((t) => this.toDTO(t));
 	}
 
 	async findById(id: string): Promise<TransactionDTO | null> {
-		const { data, error } = await this.client
+		const { data, error } = await this.adminClient
 			.from('transactions')
 			.select('*')
 			.eq('id', id)
@@ -77,7 +76,7 @@ export class TransactionRepository {
 	}
 
 	async findByUser(userId: string, limit = 50): Promise<TransactionDTO[]> {
-		const { data, error } = await this.client
+		const { data, error } = await this.adminClient
 			.from('transactions')
 			.select('*')
 			.or(`awarded_to.eq.${userId},awarded_by.eq.${userId}`)
@@ -94,13 +93,13 @@ export class TransactionRepository {
 		points_given: number;
 	}> {
 		// Get received points
-		const { data: received } = await this.client
+		const { data: received } = await this.adminClient
 			.from('transactions')
 			.select('points')
 			.eq('awarded_to', userId);
 
 		// Get given points
-		const { data: given } = await this.client
+		const { data: given } = await this.adminClient
 			.from('transactions')
 			.select('points')
 			.eq('awarded_by', userId);
