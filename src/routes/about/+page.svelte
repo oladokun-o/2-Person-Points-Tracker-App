@@ -10,10 +10,10 @@
 	<title>About - Points Tracker</title>
 </svelte:head>
 
-<div class="min-h-screen bg-stone-50">
+<div class="min-h-screen bg-stone-50 dark:bg-gray-900 transition-colors">
 	<Navigation currentUser={data.user} currentPath={page.url.pathname} />
 
-	<main class="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+	<main class="max-w-4xl mx-auto px-4 py-8 sm:py-12 sm:px-6 lg:px-8">
 		<div class="card">
 			<!-- Header -->
 			<div class="text-center mb-12">

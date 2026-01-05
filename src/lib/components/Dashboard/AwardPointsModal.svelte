@@ -84,18 +84,6 @@
 </script>
 
 <Modal {open} title="Award Points" onClose={handleClose}>
-	{#if success}
-		<div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4">
-			{success}
-		</div>
-	{/if}
-
-	{#if error}
-		<div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
-			{error}
-		</div>
-	{/if}
-
 	<!-- svelte-ignore event_directive_deprecated -->
 	<form on:submit|preventDefault={handleSubmit} class="space-y-4">
 		<!-- Select User -->

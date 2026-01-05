@@ -1,3 +1,4 @@
+import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { userRepository } from '$lib/server/db/repositories/userRepository';
 import { actionRepository } from '$lib/server/db/repositories/actionRepository';
@@ -7,13 +8,7 @@ import { noteRepository } from '$lib/server/db/repositories/noteRepository';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) {
-		return {
-			users: [],
-			actions: [],
-			rewards: [],
-			recentTransactions: [],
-			notes: []
-		};
+		throw redirect(303, '/auth/login');
 	}
 
 	// Load all data in parallel

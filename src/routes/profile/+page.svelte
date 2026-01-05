@@ -2,14 +2,21 @@
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
 	import { invalidateAll } from '$app/navigation';
+	import { toasts } from '$lib/stores/toast';
 	import type { PageData, ActionData } from './$types';
 	import Navigation from '$lib/components/Shared/Navigation.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
-	let name = $derived(data.user.name);
-	let emoji = $derived(data.user.emoji);
+	let name = $state('');
+	let emoji = $state('');
 	let saving = $state(false);
+
+	// Initialize values from data
+	$effect(() => {
+		name = data.user.name;
+		emoji = data.user.emoji;
+	});
 
 	const emojiOptions = ['👤', '😊', '🎯', '⭐', '💪', '🚀', '🎨', '🎵', '🌟', '✨', '💝', '🌈', '🦄', '🔥', '💎', '👑'];
 
@@ -19,8 +26,11 @@
 			await update();
 			saving = false;
 
-			if (result.type === 'success') {
+			if (result.type === 'success' && result.data?.success) {
 				await invalidateAll();
+				toasts.success('Profile updated successfully! ✨');
+			} else if (result.data?.error) {
+				toasts.error(result.data.error);
 			}
 		};
 	}
@@ -30,24 +40,12 @@
 	<title>Edit Profile - Points Tracker</title>
 </svelte:head>
 
-<div class="min-h-screen bg-stone-50">
+<div class="min-h-screen bg-stone-50 dark:bg-gray-900 transition-colors">
 	<Navigation currentUser={data.user} currentPath={page.url.pathname} />
 
 	<main class="max-w-2xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
 		<div class="card">
-			<h1 class="text-3xl font-bold text-gray-900 mb-6">Edit Profile</h1>
-
-			{#if form?.success}
-				<div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg">
-					Profile updated successfully!
-				</div>
-			{/if}
-
-			{#if form?.error}
-				<div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
-					{form.error}
-				</div>
-			{/if}
+			<h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">Edit Profile</h1>
 
 			<form method="POST" action="?/updateProfile" use:enhance={handleSubmit} class="space-y-6">
 				<!-- Avatar Preview -->

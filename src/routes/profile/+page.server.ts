@@ -27,7 +27,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			await userRepository.update(locals.user._id, { name, emoji });
+			await userRepository.updateProfile(locals.user._id, { name, emoji });
 			return { success: true };
 		} catch (error) {
 			console.error('Failed to update profile:', error);
